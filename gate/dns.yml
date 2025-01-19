@@ -1,5 +1,4 @@
 ---
-- name: Configure Unbound DNS
   hosts: all
   become: true
   tasks:
