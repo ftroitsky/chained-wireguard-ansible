@@ -78,7 +78,7 @@
   - name: Save iptables rules
     command: netfilter-persistent save
     
-  handlers:
+  - handlers:
     - name: Restart Unbound
       systemd:
         name: unbound
