@@ -1,88 +1,88 @@
 ---
-  - name: Configure iptables and install packages
-    hosts: all
-    tasks:
-      - name: Track input chain
-        iptables:
-          chain: INPUT
-          ctstate: ESTABLISHED,RELATED
-          jump: ACCEPT
-          comment: "Allow established and related connections"
-      
-      - name: Track forward chain
-        iptables:
-          chain: FORWARD
-          ctstate: ESTABLISHED,RELATED
-          jump: ACCEPT
-          comment: "Allow established and related connections for forwarding"
-      
-      - name: Allow incoming WireGuard connections
-        iptables:
-          chain: INPUT
-          protocol: udp
-          destination_port: 51820
-          ctstate: NEW
-          jump: ACCEPT
-          comment: "Allow new WireGuard connections"
-      
-      - name: Allow recursive DNS over TCP
-        iptables:
-          chain: INPUT
-          source: 10.200.200.0/24
-          protocol: tcp
-          destination_port: 53
-          ctstate: NEW
-          jump: ACCEPT
-          comment: "Allow DNS queries over TCP from VPN clients"
-      
-      - name: Allow recursive DNS over UDP
-        iptables:
-          chain: INPUT
-          source: 10.200.200.0/24
-          protocol: udp
-          destination_port: 53
-          ctstate: NEW
-          jump: ACCEPT
-          comment: "Allow DNS queries over UDP from VPN clients"
-      
-      - name: Allow forwarding of packets that stay in the tunnel
-        iptables:
-          chain: FORWARD
-          in_interface: wg0
-          out_interface: wg0
-          ctstate: NEW
-          jump: ACCEPT
-          comment: "Allow forwarding of packets within the WireGuard tunnel"
-      
-      - name: Set up NAT for VPN clients
-        iptables:
-          table: nat
-          chain: POSTROUTING
-          source: 10.200.200.0/24
-          out_interface: eth0
-          jump: MASQUERADE
-          comment: "Set up NAT for VPN clients"
-      
-      - name: Set up VPN chain NAT
-        iptables:
-          table: nat
-          chain: POSTROUTING
-          source: 10.200.200.0/24
-          to_source: 10.100.100.2
-          jump: SNAT
-          comment: "Set up SNAT for VPN clients"
-      
-      - name: Install iptables-persistent
-        apt:
-          name: iptables-persistent
-          state: present
-          update_cache: yes
-      
-      - name: Save iptables rules
-        command: netfilter-persistent save
+- name: Configure iptables and install packages
+  hosts: all
+  tasks:
+    - name: Track input chain
+      iptables:
+        chain: INPUT
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+        comment: "Allow established and related connections"
     
-    handlers:
-      - name: Restart Unbound
-        systemd:
-          name: unbound
-          state: restarted
+    - name: Track forward chain
+      iptables:
+        chain: FORWARD
+        ctstate: ESTABLISHED,RELATED
+        jump: ACCEPT
+        comment: "Allow established and related connections for forwarding"
+    
+    - name: Allow incoming WireGuard connections
+      iptables:
+        chain: INPUT
+        protocol: udp
+        destination_port: 51820
+        ctstate: NEW
+        jump: ACCEPT
+        comment: "Allow new WireGuard connections"
+    
+    - name: Allow recursive DNS over TCP
+      iptables:
+        chain: INPUT
+        source: 10.200.200.0/24
+        protocol: tcp
+        destination_port: 53
+        ctstate: NEW
+        jump: ACCEPT
+        comment: "Allow DNS queries over TCP from VPN clients"
+    
+    - name: Allow recursive DNS over UDP
+      iptables:
+        chain: INPUT
+        source: 10.200.200.0/24
+        protocol: udp
+        destination_port: 53
+        ctstate: NEW
+        jump: ACCEPT
+        comment: "Allow DNS queries over UDP from VPN clients"
+    
+    - name: Allow forwarding of packets that stay in the tunnel
+      iptables:
+        chain: FORWARD
+        in_interface: wg0
+        out_interface: wg0
+        ctstate: NEW
+        jump: ACCEPT
+        comment: "Allow forwarding of packets within the WireGuard tunnel"
+    
+    - name: Set up NAT for VPN clients
+      iptables:
+        table: nat
+        chain: POSTROUTING
+        source: 10.200.200.0/24
+        out_interface: eth0
+        jump: MASQUERADE
+        comment: "Set up NAT for VPN clients"
+    
+    - name: Set up VPN chain NAT
+      iptables:
+        table: nat
+        chain: POSTROUTING
+        source: 10.200.200.0/24
+        to_source: 10.100.100.2
+        jump: SNAT
+        comment: "Set up SNAT for VPN clients"
+    
+    - name: Install iptables-persistent
+      apt:
+        name: iptables-persistent
+        state: present
+        update_cache: yes
+    
+    - name: Save iptables rules
+      command: netfilter-persistent save
+  
+  handlers:
+    - name: Restart Unbound
+      systemd:
+        name: unbound
+        state: restarted
