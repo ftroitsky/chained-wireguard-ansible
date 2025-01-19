@@ -1,48 +1,39 @@
 ---
-- hosts: all
-  become: true
-  tasks:
-    - name: Install Unbound and related packages
-      apt:
-        name:
-          - unbound
-          - unbound-host
-        state: present
-        update_cache: yes
-
-    - name: Download the list of Root DNS Servers
-      get_url:
-        url: https://www.internic.net/domain/named.cache
-        dest: /var/lib/unbound/root.hints
-        owner: unbound
-        group: unbound
-        mode: '0644'
-      notify: Restart Unbound
-
-    - name: Generate Unbound configuration
-      template:
-        src: "templates/unbound.conf"
-        dest: "/etc/unbound/unbound.conf"
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Restart Unbound
-
-    - name: Ensure /var/lib/unbound ownership
-      file:
-        path: /var/lib/unbound
-        owner: unbound
-        group: unbound
-        recurse: yes
-
-    - name: Enable and start Unbound service
-      systemd:
-        name: unbound
-        enabled: yes
-        state: started
-
-  handlers:
-    - name: Restart Unbound
-      systemd:
-        name: unbound
-        state: restarted
+  - name: Install Unbound and related packages
+    apt:
+      name:
+        - unbound
+        - unbound-host
+      state: present
+      update_cache: yes
+  
+  - name: Download the list of Root DNS Servers
+    get_url:
+      url: https://www.internic.net/domain/named.cache
+      dest: /var/lib/unbound/root.hints
+      owner: unbound
+      group: unbound
+      mode: '0644'
+    notify: Restart Unbound
+  
+  - name: Generate Unbound configuration
+    template:
+      src: "templates/unbound.conf"
+      dest: "/etc/unbound/unbound.conf"
+      owner: root
+      group: root
+      mode: '0644'
+    notify: Restart Unbound
+  
+  - name: Ensure /var/lib/unbound ownership
+    file:
+      path: /var/lib/unbound
+      owner: unbound
+      group: unbound
+      recurse: yes
+  
+  - name: Enable and start Unbound service
+    systemd:
+      name: unbound
+      enabled: yes
+      state: started
