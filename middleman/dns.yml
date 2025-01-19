@@ -1,6 +1,5 @@
 ---
-- name: Configure Unbound DNS
-  hosts: all
+- hosts: all
   become: true
   tasks:
     - name: Install Unbound and related packages
