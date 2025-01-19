@@ -1,6 +1,4 @@
 ---
-
-- name: Configure firewall rules
   hosts: all
   become: true
   tasks:
